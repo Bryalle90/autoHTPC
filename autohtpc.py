@@ -9,11 +9,11 @@ import ConfigParser
 import libs.client.utorrent as torrent_client
 
 from libs.unrar2 import RarFile
+from libs.pushbullet import PushBullet
 from libs import email
-from libs import pushbullet
 
 class Process():		
-	def getStateType(state):
+	def getStateType(self, state):
 		state = int(state)
 		if state == 4 or state == 5 or state == 7 or state == 8 or state == 10:
 			return 'seeding'
@@ -28,7 +28,7 @@ class Process():
 		return None
 		
 	def readConfig(self, path, fname):
-		file = os.path.normpath(os.path.join(path, 'labels', fname) + '.cfg')
+		file = os.path.normpath(os.path.join(path, fname) + '.cfg')
 		config = ConfigParser.ConfigParser()
 		config.read(file)
 		return config
@@ -37,9 +37,9 @@ class Process():
 		self.uTorrent = torrent_client.TorrentClient()
 		url = 'http://localhost:' + port + '/gui/'
 		
-        if not self.uTorrent.connect(url, user, pw):
-            print 'could not connect to utorrent - exiting' + '\n'
-            sys.exit(-1)
+		if not self.uTorrent.connect(url, user, pw):
+			print 'could not connect to utorrent - exiting' + '\n'
+			sys.exit(-1)
 			
 	def getTorrentInfo(self, hash):
 		torrent = self.uTorrent.find_torrent(hash)
@@ -62,19 +62,19 @@ class Process():
 				return True
 		return False
 
-    # returns true if file is the main rar file in a rar set or just a single rar
-    def isMainRar(self, f):
-        with open(f, "rb") as this_file:
-            byte = this_file.read(12)
+	# returns true if file is the main rar file in a rar set or just a single rar
+	def isMainRar(self, f):
+		with open(f, "rb") as this_file:
+			byte = this_file.read(12)
 
-        spanned = binascii.hexlify(byte[10])
-        main = binascii.hexlify(byte[11])
+		spanned = binascii.hexlify(byte[10])
+		main = binascii.hexlify(byte[11])
 
-        if spanned == "01" and main == "01":    # main rar archive in a set of archives
-            return True
-        elif spanned == "00" and main == "00":  # single rar
-            return True
-        return False
+		if spanned == "01" and main == "01":	# main rar archive in a set of archives
+			return True
+		elif spanned == "00" and main == "00":	# single rar
+			return True
+		return False
 		
 	def filterFiles(self, files, extensions, ignore):
 		keep = []
@@ -97,56 +97,55 @@ class Process():
 		return keep
 		
 	def extract(self, file, destination):
-        try:
-            rar_handle = RarFile(file)
-            for rar_file in rar_handle.infolist():
-                sub_path = os.path.join(destination, rar_file.filename)
-                if rar_file.isdir and not os.path.exists(sub_path):
-                    os.makedirs(sub_path)
-                else:
-                    rar_handle.extract(condition=[rar_file.index], path=destination, withSubpath=True, overwrite=False)
-            del rar_handle
-            print "Successfully extracted " + os.path.split(file)[1]
-        except Exception, e:
-            print "Failed to extract " + os.path.split(file)[1] + ": " + str(e)
+		try:
+			rar_handle = RarFile(file)
+			for rar_file in rar_handle.infolist():
+				sub_path = os.path.join(destination, rar_file.filename)
+				if rar_file.isdir and not os.path.exists(sub_path):
+					os.makedirs(sub_path)
+				else:
+					rar_handle.extract(condition=[rar_file.index], path=destination, withSubpath=True, overwrite=False)
+			del rar_handle
+			print "Successfully extracted " + os.path.split(file)[1]
+		except Exception, e:
+			print "Failed to extract " + os.path.split(file)[1] + ": " + str(e)
 			
 	def createDir(self, directory):
-        if not os.path.isdir(directory):
-            try:
-                os.makedirs(directory)
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise
-                pass
+		if not os.path.isdir(directory):
+			try:
+				os.makedirs(directory)
+			except OSError as e:
+				if e.errno != errno.EEXIST:
+					raise
+				pass
 				
-    # copies a file to a destination folder, returns success
-    def copyFile(self, source_file, destination):
+	# copies a file to a destination folder, returns success
+	def copyFile(self, source_file, destination):
 		self.createDir(destination)
-        file_name = os.path.split(source_file)[1]
-        destination_file = os.path.join(destination, file_name)
-        if not os.path.isfile(destination_file):
-            try:
-                shutil.copy2(source_file, destination_file)
-                print 'Successfully copied ' + file_name + ' to destination'
-            except Exception, e:
-                print 'Failed to copy ' + file_name + ': ' + str(e) + '\n'
-        else:
-            print file_name + ' already exists in destination - skipping'
+		file_name = os.path.split(source_file)[1]
+		destination_file = os.path.join(destination, file_name)
+		if not os.path.isfile(destination_file):
+			try:
+				shutil.copy2(source_file, destination_file)
+			except Exception, e:
+				print 'Failed to copy ' + file_name + ': ' + str(e) + '\n'
+		else:
+			print file_name + ' already exists in destination - skipping'
 
-	def cleanDir(self, path, desiredExtensions, wordsToIgnore):
+	def cleanDir(self, path, desiredExtensions, ignore):
 		# remove any file that doesn't have a desired extension or has an ignore word in the file name
 		for dirName, subdirList, fileList in os.walk(path):
-            for file in fileList:
+			for file in fileList:
 				if not file.endswith(desiredExtensions) or self.isSubstring(ignore, file):
-                    try:
-                        os.remove(os.path.normpath(os.path.join(dirName, file)))
-                    except Exception, e:
-                        print 'could not delete ' + file + ': ' + str(e)
+					try:
+						os.remove(os.path.normpath(os.path.join(dirName, file)))
+					except Exception, e:
+						print 'could not delete ' + file + ': ' + str(e)
 						
 		# remove any folder that is completely empty
-        for dirName, subdirList, fileList in os.walk(path, topdown=False):
-            if len(fileList) == 0 and len(subdirList) == 0:
-                os.rmdir(dirName)
+		for dirName, subdirList, fileList in os.walk(path, topdown=False):
+			if len(fileList) == 0 and len(subdirList) == 0:
+				os.rmdir(dirName)
 			
 	def filebot(self, fb, source, dest, db, format):
 		fb_args = [
@@ -154,32 +153,31 @@ class Process():
 			'-rename', source,
 			'--output', dest,
 			'--db', db,
-			'--format', file_format,
+			'--format', format,
 			'-non-strict'
 		]
 		try:
-            subprocess.call(fb_args)
+			subprocess.call(fb_args)
 		except Exception, e:
-            print 'could not rename file:', str(e)
-		shutil.rmtree(source, ignore_errors=True)
+			print 'could not rename file:', str(e)
 	
-	def removeTorrent(self, hash)
+	def removeTorrent(self, hash):
 		torrent = self.uTorrent.find_torrent(hash)
 		self.uTorrent.delete_torrent(torrent)
 		
 if __name__ == "__main__":
 	if len(sys.argv) == 4:
-		root = os.getcwd()
-		labels_folder = os.path.normpath(os.path.join(self.root, 'labels'))
+		root = os.path.dirname(os.path.realpath(sys.argv[0]))
+		labels_folder = os.path.normpath(os.path.join(root, 'labels'))
 		filebot_path = os.path.normpath(os.path.join(root, 'libs', 'FileBot_4.5', 'FileBot.exe'))
 		
 		# create our file processor
 		processor = Process()
 		
 		# get torrent info from uTorrent
-		torrent_hash = sys.argv[1]                           # Hash of the torrent, %I
-		torrent_prev = processor.getStateType(sys.argv[2])   # Previous state of the torrent, %P
-		torrent_state = processor.getStateType(sys.argv[3])  # Current state of the torrent, %S
+		torrent_hash = sys.argv[1]							 # Hash of the torrent, %I
+		torrent_prev = processor.getStateType(sys.argv[2])	 # Previous state of the torrent, %P
+		torrent_state = processor.getStateType(sys.argv[3])	 # Current state of the torrent, %S
 		
 		# open the main config
 		try:
@@ -198,9 +196,10 @@ if __name__ == "__main__":
 		torrent = processor.getTorrentInfo(torrent_hash)
 		
 		# process torrent files
-		if torrent['label'] == ''):
+		if torrent['label'] == '':
 			print 'label is blank, skipping'
 		elif os.path.isfile(os.path.join(root, 'labels', torrent['label']) + '.cfg'):
+			action = None
 			# if torrent goes from downloading -> seeding, copy and extract files
 			if (torrent_prev == 'downloading') and (torrent_state == 'seeding' or torrent_state == 'moving'):
 				# get what extensions we want
@@ -224,7 +223,7 @@ if __name__ == "__main__":
 				filesToCopy = processor.filterFiles(torrent['files'], desiredExtensions, wordsToIgnore)
 				
 				# get archives to extract from
-				archiveExtensions = config.get("Extensions","archive").split('|')
+				archiveExtensions = tuple(config.get("Extensions","archive").split('|'))
 				filesToExtract = processor.filterArchives(torrent['files'], archiveExtensions, wordsToIgnore)
 				
 				# copy/extract files to processing directory
@@ -241,7 +240,7 @@ if __name__ == "__main__":
 				outputDir = label_config.get("Filebot","path")
 				db = label_config.get("Filebot","database")
 				format = label_config.get("Filebot","format")
-				process.filebot(filebot_path, processingDir, outputDir, db, format)
+				processor.filebot(filebot_path, processingDir, outputDir, db, format)
 				
 				action = 'added'
 								
@@ -249,6 +248,9 @@ if __name__ == "__main__":
 			elif torrent_prev == 'seeding' and torrent_state == 'finished':
 				if config.getboolean("General","remove"):
 					processor.removeTorrent(torrent_hash)
+					processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
+					if os.path.isdir(processingDir):
+						shutil.rmtree(processingDir, ignore_errors=True)
 					action = 'removed'
 			
 			# notify user
@@ -280,7 +282,7 @@ if __name__ == "__main__":
 					pb = PushBullet(config.get("PushBullet", "token"))
 					devices = config.get("PushBullet", "devices").split('|')
 					
-					if not devices == '':
+					if not devices == ['']:
 						ds = pb.getDevices()
 						for d in ds:
 							if d['pushable'] and d['nickname'] in devices:
@@ -288,48 +290,4 @@ if __name__ == "__main__":
 					else:
 						pb.pushNote('', title, body)
 			
-			
-			
-			
-			
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		#raw_input('press enter')
