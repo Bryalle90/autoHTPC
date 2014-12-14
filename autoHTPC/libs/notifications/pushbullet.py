@@ -1,6 +1,6 @@
 import json
-import requests
-from requests.auth import HTTPBasicAuth
+from .. import requests
+from ..requests.auth import HTTPBasicAuth
 
 HOST = "https://api.pushbullet.com/v2"
 
