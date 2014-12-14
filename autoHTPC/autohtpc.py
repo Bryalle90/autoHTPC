@@ -395,4 +395,8 @@ if __name__ == "__main__":
 			print 'label does not have a config file'
 			
 		print 'DONE!'
-		#raw_input('press enter')
+		if config.getboolean("General","pause"):
+			raw_input('press enter to continue')
+	else:
+		print 'autoHTPC received an incorrect amount of arguments'
+		raw_input('press enter to continue')

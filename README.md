@@ -41,6 +41,7 @@ path         | location for files to be extracted/copied to before processing by
 remove       | (True/False) remove torrent from uTorrent when done seeding
 notify       | (True/False) send a notification when done processing a torrent
 notifyRemove | (True/False) send a notification when removing a torrent
+pause        | (True/False) pause the script at the end before closing
 
 Client       | 
 ------------:| :------------
