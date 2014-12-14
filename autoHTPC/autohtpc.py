@@ -239,7 +239,7 @@ if __name__ == "__main__":
 		root = os.path.dirname(os.path.realpath(sys.argv[0]))
 		config_folder = os.path.normpath(os.path.join(root, 'cfg'))
 		labels_folder = os.path.normpath(os.path.join(config_folder, 'labels'))
-		filebot = os.path.normpath(os.path.join(root, 'libs', 'FileBot_4.5', 'FileBot.jar'))
+		filebot = os.path.normpath(os.path.join(root, 'libs', 'FileBot_4.5', 'filebot'))
 		
 		# create our file processor
 		processor = Process()
@@ -268,7 +268,7 @@ if __name__ == "__main__":
 		# process torrent files
 		if torrent['label'] == '':
 			print 'label is blank, skipping'
-		elif os.path.isfile(os.path.join(root, 'labels', torrent['label']) + '.cfg'):
+		elif os.path.isfile(os.path.join(labels_folder, torrent['label']) + '.cfg'):
 			action = None
 			# if torrent goes from downloading -> seeding, copy and extract files
 			if (torrent_prev == 'downloading') and (torrent_state == 'seeding' or torrent_state == 'moving'):
@@ -335,11 +335,11 @@ if __name__ == "__main__":
 				}
 				if config.getboolean("Email", "enable"):
 					email_info = {
-						'server': self.config.get("Email", "SMTPServer"),
-						'port': self.config.get("Email", "SMTPPort"),
-						'user': self.config.get("Email", "username"),
-						'pass': self.config.get("Email", "password"),
-						'to': self.config.get("Email", "emailTo").split('|')
+						'server': config.get("Email", "SMTPServer"),
+						'port': config.get("Email", "SMTPPort"),
+						'user': config.get("Email", "username"),
+						'pass': config.get("Email", "password"),
+						'to': config.get("Email", "emailTo").split('|')
 					}
 					processor.sendEmail(email_info, notification)
 				if config.getboolean("PushBullet", "enable"):
