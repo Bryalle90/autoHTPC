@@ -244,7 +244,7 @@ if __name__ == "__main__":
 				
 				action = 'added'
 								
-			# if torrent goes from seeding -> finished and has a label config file, remove torrent from list
+			# if torrent goes from seeding -> finished, remove torrent from list
 			elif torrent_prev == 'seeding' and torrent_state == 'finished':
 				processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
 				if os.path.isdir(processingDir):
