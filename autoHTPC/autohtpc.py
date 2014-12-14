@@ -97,6 +97,8 @@ class Process():
 		return keep
 		
 	def extract(self, file, destination):
+		file_name = os.path.split(file)[1]
+		print 'attempting to extract:', file_name
 		try:
 			rar_handle = RarFile(file)
 			for rar_file in rar_handle.infolist():
@@ -121,12 +123,13 @@ class Process():
 				
 	# copies a file to a destination folder, returns success
 	def copyFile(self, source_file, destination):
-		self.createDir(destination)
 		file_name = os.path.split(source_file)[1]
 		destination_file = os.path.join(destination, file_name)
-		if not os.path.isfile(destination_file):
+		print 'attempting to copy:', file_name
+		if not os.path.isfile(destination_file) and os.path.isfile(source_file):
 			try:
 				shutil.copy2(source_file, destination_file)
+				print "Successfully extracted " + file_name
 			except Exception, e:
 				print 'Failed to copy ' + file_name + ': ' + str(e) + '\n'
 		else:
@@ -138,6 +141,7 @@ class Process():
 			for file in fileList:
 				if not file.endswith(desiredExtensions) or self.isSubstring(ignore, file):
 					try:
+						print 'removing file:', file
 						os.remove(os.path.normpath(os.path.join(dirName, file)))
 					except Exception, e:
 						print 'could not delete ' + file + ': ' + str(e)
@@ -145,6 +149,7 @@ class Process():
 		# remove any folder that is completely empty
 		for dirName, subdirList, fileList in os.walk(path, topdown=False):
 			if len(fileList) == 0 and len(subdirList) == 0:
+				print 'removing directory:', dirName
 				os.rmdir(dirName)
 			
 	def renameAndMove(self, filebot, source, dest, db, format):
@@ -244,14 +249,24 @@ if __name__ == "__main__":
 		# create our file processor
 		processor = Process()
 		
+		print 'autoHTPC script running'
 		# get torrent info from uTorrent
 		torrent_hash = sys.argv[1]							 # Hash of the torrent, %I
 		torrent_prev = processor.getStateType(sys.argv[2])	 # Previous state of the torrent, %P
 		torrent_state = processor.getStateType(sys.argv[3])	 # Current state of the torrent, %S
+		print '--'
+		
+		print 'info received:'
+		print '--'
+		print 'torrent hash:    ' + torrent_hash
+		print 'torrent state:   ' + torrent_state
+		print 'previous state:  ' + torrent_prev
+		print '--\n'
 		
 		# open the main config
 		try:
 			config = processor.readConfig(config_folder, 'config')
+			print 'config file read\n'
 		except Exception, e:
 			print 'could not open config:', str(e)
 			sys.exit(0)
@@ -261,13 +276,20 @@ if __name__ == "__main__":
 		user = config.get("Client", "username")
 		pw = config.get("Client", "password")
 		processor.connect(port, user, pw)
+		print 'connected to uTorrent\n'
 		
 		# get info for torrent
+		print 'Getting torrent info from uTorrent'
+		print '--'
 		torrent = processor.getTorrentInfo(torrent_hash)
+		print 'torrent name:    ' + torrent['name']
+		print 'torrent label:   ' + torrent['label']
+		print '--\n'
+		
 		
 		# process torrent files
 		if torrent['label'] == '':
-			print 'label is blank, skipping'
+			print 'label is blank - skipping'
 		elif os.path.isfile(os.path.join(labels_folder, torrent['label']) + '.cfg'):
 			action = None
 			# if torrent goes from downloading -> seeding, copy and extract files
@@ -285,9 +307,12 @@ if __name__ == "__main__":
 					'readme': label_config.getboolean("Type", "readme")
 				}
 				desiredExtensions = processor.getExtensions(keep_ext, extensions)
+				print 'looking for files with these extensions:', desiredExtensions, '\n'
+				
 				
 				# get words we don't want
 				wordsToIgnore = config.get("Extensions","ignore").split('|')
+				print 'ignoring files with these words in the file name:', wordsToIgnore, '\n'
 				
 				# get what files to keep from torrent folder
 				filesToCopy = processor.filterFiles(torrent['files'], desiredExtensions, wordsToIgnore)
@@ -298,15 +323,23 @@ if __name__ == "__main__":
 				
 				# copy/extract files to processing directory
 				processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
+				processor.createDir(processingDir)
+				print 'copying and extracting files to:\n\t', processingDir
+				print '--'
 				for file in filesToCopy:
 					processor.copyFile(file, processingDir)
 				for file in filesToExtract:
 					processor.extract(file, processingDir)
+				print '--\n'
 				
 				# clean out unwanted files from processing dir
+				print 'cleaning unwanted files in:\n\t', processingDir
+				print '--'
 				processor.cleanDir(processingDir, desiredExtensions, wordsToIgnore)
+				print '--\n'
 				
 				# use filebot to rename files and move to final directory
+				print 'sending file info to filebot\n'
 				outputDir = label_config.get("Filebot","path")
 				db = label_config.get("Filebot","database")
 				format = label_config.get("Filebot","format")
@@ -317,14 +350,18 @@ if __name__ == "__main__":
 			# if torrent goes from seeding -> finished, remove torrent from list
 			elif torrent_prev == 'seeding' and torrent_state == 'finished':
 				processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
+				print 'removing processing directory\n'
 				if os.path.isdir(processingDir):
 					shutil.rmtree(processingDir, ignore_errors=True)
 				if config.getboolean("General","remove"):
+					print 'removing torrent from uTorrent\n'
 					processor.removeTorrent(torrent_hash)
 					action = 'removed'
 			
 			# notify user
 			if (action == 'added' and config.getboolean("General","notify")) or (action == 'removed' and config.getboolean("General","notifyRemove")):
+				print 'sending notifications'
+				print '--'
 				notification = {
 					'subject': 'autoHTPC Notification',
 					'title': torrent['name'],
@@ -334,6 +371,7 @@ if __name__ == "__main__":
 					'action': action
 				}
 				if config.getboolean("Email", "enable"):
+					print 'sending email'
 					email_info = {
 						'server': config.get("Email", "SMTPServer"),
 						'port': config.get("Email", "SMTPPort"),
@@ -343,8 +381,11 @@ if __name__ == "__main__":
 					}
 					processor.sendEmail(email_info, notification)
 				if config.getboolean("PushBullet", "enable"):
+					print 'pushing note'
 					token = config.get("PushBullet", "token")
 					devices = config.get("PushBullet", "devices").split('|')
 					processor.sendPush(token, devices, notification)
+				print '--\n'
 			
+		print 'DONE!'
 		#raw_input('press enter')
