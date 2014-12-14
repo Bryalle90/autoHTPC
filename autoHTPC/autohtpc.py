@@ -80,7 +80,7 @@ class Process():
 		keep = []
 		for file in files:
 			if file.endswith(extensions):
-				if not (self.isSubstring(ignore, file)):
+				if not (self.isSubstring(ignore, os.path.split(file)[1])):
 					keep.append(file)
 		return keep
 		
@@ -88,7 +88,7 @@ class Process():
 		keep = []
 		for file in files:
 			if file.endswith(extensions):
-				if not (self.isSubstring(ignore, file)):
+				if not (self.isSubstring(ignore, os.path.split(file)[1])):
 					if file.endswith('.rar'):
 						if self.isMainRar(file):
 							keep.append(file)
@@ -106,9 +106,9 @@ class Process():
 				else:
 					rar_handle.extract(condition=[rar_file.index], path=destination, withSubpath=True, overwrite=False)
 			del rar_handle
-			print "Successfully extracted " + os.path.split(file)[1]
+			print "Successfully extracted " + file_name
 		except Exception, e:
-			print "Failed to extract " + os.path.split(file)[1] + ": " + str(e)
+			print "Failed to extract " + file_name + ": " + str(e)
 			
 	def createDir(self, directory):
 		if not os.path.isdir(directory):
