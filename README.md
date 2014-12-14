@@ -1,7 +1,7 @@
 # README
 
-version: 1.1
-date: Dec 12, 2014
+* version: 1.2
+* date: Dec 13, 2014
 
 ## Program Requirements
 ### Required
