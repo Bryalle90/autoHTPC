@@ -129,7 +129,7 @@ class Process():
 		if not os.path.isfile(destination_file) and os.path.isfile(source_file):
 			try:
 				shutil.copy2(source_file, destination_file)
-				print "Successfully extracted " + file_name
+				print "Successfully copied " + file_name
 			except Exception, e:
 				print 'Failed to copy ' + file_name + ': ' + str(e) + '\n'
 		else:
