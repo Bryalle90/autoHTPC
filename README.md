@@ -5,7 +5,7 @@ date: Dec 12, 2014
 
 ## Program Requirements
 ### Required
-* [Python 2.7](https://www.python.org/download/releases/2.7.8/)
+* [Python 2.7](https://www.python.org/downloads/)
 	* This script is written and tested in Python 2.7 and Windows 7/8
 * [uTorrent 3.0+](http://www.utorrent.com/downloads/complete/os/win/track/stable)
 ### Optional
@@ -23,13 +23,13 @@ date: Dec 12, 2014
 * Optionally create an alternative listening port
 #### How to run script on each torrent
 * Go to `preferences>advanced>run program>run program when torrent changes state`
-	* input(with quotes):
-	`"path\to\pythonw.exe" "path\to\autohtpc.py" %I %P %S`
+	* input(with quotes): `"path\to\pythonw.exe" "path\to\autohtpc.py" %I %P %S`
 * it is recommended to at least keep seeding for a few minutes to allow time for 
   the script to finish extracting and moving files before removing the torrent
   from uTorrent, if enabled
-	* Go to `preferences>queueing>minimum seeding time(minutes)`
-	recommended to set to at least 10 minutes (can be adjusted for faster PCs)
+* Go to `preferences>queueing>minimum seeding time(minutes)`
+	* recommended to set to at least 10 minutes to allow time for 
+	the script to finish extracting and moving files
 
 ### Set up autoHTPC
 * edit included config.cfg file
@@ -60,14 +60,14 @@ PushBullet    |
 ------------: | :------------
 enable        | (True/False) Use PushBullet for notifications
 [token](https://www.pushbullet.com/account)         | Your access token from Pushbullet
-devices       | Can either be a list of specific device names, separated by `|`, or leave blank for all devices
+devices       | Can either be a list of specific device names, separated by `\|`, or leave blank for all devices
 
 Extensions    | 
 ------------: | :------------
-video         | You can either leave it as-is or modify the list, separating each extension by `|`
-subtitle      | You can either leave it as-is or modify the list, separating each extension by `|`
-readme        | You can either leave it as-is or modify the list, separating each extension by `|`
-archive       | You can either leave it as-is or modify the list, separating each extension by `|`
+video         | You can either leave it as-is or modify the list, separating each extension by `\|`
+subtitle      | You can either leave it as-is or modify the list, separating each extension by `\|`
+readme        | You can either leave it as-is or modify the list, separating each extension by `\|`
+archive       | You can either leave it as-is or modify the list, separating each extension by `\|`
 ignore        | Any file with any of the words in this list will be ignored, even with a desired extension, separated by `|`
 
 * set up labels in the labels folder (the script will ignore any torrent without a label and accompanying config file)
