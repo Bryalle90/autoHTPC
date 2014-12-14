@@ -147,9 +147,9 @@ class Process():
 			if len(fileList) == 0 and len(subdirList) == 0:
 				os.rmdir(dirName)
 			
-	def filebot(self, fb, source, dest, db, format):
+	def renameAndMove(self, filebot, source, dest, db, format):
 		fb_args = [
-			fb,
+			filebot,
 			'-rename', source,
 			'--output', dest,
 			'--db', db,
@@ -165,11 +165,80 @@ class Process():
 		torrent = self.uTorrent.find_torrent(hash)
 		self.uTorrent.delete_torrent(torrent)
 		
+	def sendPush(self, token, devices, notification):
+		pb = PushBullet(token)
+		subject = notification['subject']
+		body = 'title: ' + notification['title'] + '\n' +\
+				'label: ' + notification['label'] + '\n' +\
+				'date: ' + notification['date'] + '\n' +\
+				'time: ' + notification['time'] + '\n' +\
+				'action: ' + notification['action']
+		
+		if not devices == ['']:
+			ds = pb.getDevices()
+			for d in ds:
+				if d['pushable'] and d['nickname'] in devices:
+					pb.pushNote(d['iden'], subject, body)
+		else:
+			pb.pushNote('', subject, body)
+	
+	def sendEmail(self, email_info, notification):
+		em = Email()
+		
+		header = 'Content-type: text/html\n' + 'Subject:' + notification['subject'] + '\n'
+		body = """
+		<html xmlns="http://www.w3.org/1999/xhtml">
+			<head>
+				<style type="text/css">
+				table.gridtable {
+					font-family: verdana,arial,sans-serif;
+					font-size:11px;
+					color:#333333;
+					border-width: 0px;
+					border-color: green;
+					border-collapse: collapse;
+				}
+				table.gridtable th {
+					border-width: 0x;
+					padding: 8px;
+					border-style: solid;
+					border-color: green;
+					background-color: green;
+					align: left;
+				}
+				table.gridtable td {
+					border-width: 0px;
+					padding: 8px;
+					border-style: solid;
+					border-color: white;
+					background-color: #ffffff;
+				}
+				</style>
+			</head>
+			<body bgcolor="black">
+				<table class="gridtable">
+					<colgroup>
+						<col/>
+						<col/>
+					</colgroup>
+					<tr><td>Title:</td><td>%s</td></tr>
+					<tr><td>Label:</td><td>%s</td></tr>
+					<tr><td>Date:</td><td>%s</td></tr>
+					<tr><td>Time:</td><td>%s</td></tr>
+					<tr><td>Action:</td><td>%s</td></tr>
+				</table>
+			</body>
+		</html>
+		""" % (notification['title'], notification['label'], notification['date'], notification['time'], notification['action'])
+		msg = header + body
+		
+		em.send_email(email_info, msg)
+		
 if __name__ == "__main__":
 	if len(sys.argv) == 4:
 		root = os.path.dirname(os.path.realpath(sys.argv[0]))
-		labels_folder = os.path.normpath(os.path.join(root, 'labels'))
-		filebot_path = os.path.normpath(os.path.join(root, 'libs', 'FileBot_4.5', 'FileBot.jar'))
+		labels_folder = os.path.normpath(os.path.join(root, 'cfg', 'labels'))
+		filebot = os.path.normpath(os.path.join(root, 'libs', 'FileBot_4.5', 'FileBot.jar'))
 		
 		# create our file processor
 		processor = Process()
@@ -181,7 +250,7 @@ if __name__ == "__main__":
 		
 		# open the main config
 		try:
-			config = processor.readConfig(root, 'config')
+			config = processor.readConfig(root, 'cfg', 'config')
 		except Exception, e:
 			print 'could not open config:', str(e)
 			sys.exit(0)
@@ -240,7 +309,7 @@ if __name__ == "__main__":
 				outputDir = label_config.get("Filebot","path")
 				db = label_config.get("Filebot","database")
 				format = label_config.get("Filebot","format")
-				processor.filebot(filebot_path, processingDir, outputDir, db, format)
+				processor.renameAndMove(filebot, processingDir, outputDir, db, format)
 				
 				action = 'added'
 								
@@ -256,6 +325,7 @@ if __name__ == "__main__":
 			# notify user
 			if (action == 'added' and config.getboolean("General","notify")) or (action == 'removed' and config.getboolean("General","notifyRemove")):
 				notification = {
+					'subject': 'autoHTPC Notification',
 					'title': torrent['name'],
 					'label': torrent['label'],
 					'date': time.strftime("%m/%d/%Y"),
@@ -270,24 +340,10 @@ if __name__ == "__main__":
 						'pass': self.config.get("Email", "password"),
 						'to': self.config.get("Email", "emailTo")
 					}
-					em = Email()
-					em.send_email(email_info, notification)
+					processor.sendEmail(email_info, notification)
 				if config.getboolean("PushBullet", "enable"):
-					title = 'autoHTPC Notification'
-					body = 'title: ' + notification['title'] + '\n' +\
-							'label: ' + notification['label'] + '\n' +\
-							'date: ' + notification['date'] + '\n' +\
-							'time: ' + notification['time'] + '\n' +\
-							'action: ' + notification['action']
-					pb = PushBullet(config.get("PushBullet", "token"))
+					token = config.get("PushBullet", "token")
 					devices = config.get("PushBullet", "devices").split('|')
-					
-					if not devices == ['']:
-						ds = pb.getDevices()
-						for d in ds:
-							if d['pushable'] and d['nickname'] in devices:
-								pb.pushNote(d['iden'], title, body)
-					else:
-						pb.pushNote('', title, body)
+					processor.sendPush(token, devices, notification)
 			
 		#raw_input('press enter')
