@@ -246,11 +246,11 @@ if __name__ == "__main__":
 								
 			# if torrent goes from seeding -> finished and has a label config file, remove torrent from list
 			elif torrent_prev == 'seeding' and torrent_state == 'finished':
+				processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
+				if os.path.isdir(processingDir):
+					shutil.rmtree(processingDir, ignore_errors=True)
 				if config.getboolean("General","remove"):
 					processor.removeTorrent(torrent_hash)
-					processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
-					if os.path.isdir(processingDir):
-						shutil.rmtree(processingDir, ignore_errors=True)
 					action = 'removed'
 			
 			# notify user
