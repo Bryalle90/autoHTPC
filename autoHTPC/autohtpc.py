@@ -237,7 +237,8 @@ class Process():
 if __name__ == "__main__":
 	if len(sys.argv) == 4:
 		root = os.path.dirname(os.path.realpath(sys.argv[0]))
-		labels_folder = os.path.normpath(os.path.join(root, 'cfg', 'labels'))
+		config_folder = os.path.normpath(os.path.join(root, 'cfg'))
+		labels_folder = os.path.normpath(os.path.join(config_folder, 'labels'))
 		filebot = os.path.normpath(os.path.join(root, 'libs', 'FileBot_4.5', 'FileBot.jar'))
 		
 		# create our file processor
@@ -250,7 +251,7 @@ if __name__ == "__main__":
 		
 		# open the main config
 		try:
-			config = processor.readConfig(root, 'cfg', 'config')
+			config = processor.readConfig(config_folder, 'config')
 		except Exception, e:
 			print 'could not open config:', str(e)
 			sys.exit(0)
