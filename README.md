@@ -8,6 +8,7 @@
 * [Python 2.7](https://www.python.org/downloads/)
 	* This script is written and tested in Python 2.7 and Windows 7/8
 * [uTorrent 3.0+](http://www.utorrent.com/downloads/complete/os/win/track/stable)
+* [Java Runtime Environment 32-bit](https://java.com/en/download/manual.jsp)
 ### Optional
 * [Pushbullet](https://www.pushbullet.com/)
 	* pushbullet is a free application that allows you to send notifications, lists, files, etc. 
@@ -59,7 +60,7 @@ emailTo      | What address to email (suggested to use your own email address ag
 PushBullet   | 
 ------------:| :------------
 enable       | (True/False) Use PushBullet for notifications
-[token](https://www.pushbullet.com/account)        | Your access token from Pushbullet
+token        | Your [access token](https://www.pushbullet.com/account) from Pushbullet
 devices      | Can either be a list of specific device names, separated by (pipe character), or leave blank for all devices
 
 Extensions   | 
@@ -81,5 +82,5 @@ readme       | (True/False) For this label, do you want to keep files of this ty
 Filebot      | 
 ------------:| :------------
 database     | TV: `TVRage, AniDB, TheTVDB` Movies: `OpenSubtitles, IMDb, TheMovieDB`
-[format](http://www.filebot.net/naming.html)       | How you want your file names to be formatted
+format       | How you want your file names to be [formatted](http://www.filebot.net/naming.html)
 path         | The final path for your file(s)
