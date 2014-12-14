@@ -291,7 +291,6 @@ if __name__ == "__main__":
 		print 'torrent label:   ' + torrent['label']
 		print '--\n'
 		
-		
 		# process torrent files
 		if torrent['label'] == '':
 			print 'label is blank - skipping'
@@ -350,8 +349,7 @@ if __name__ == "__main__":
 				format = label_config.get("Filebot","format")
 				processor.renameAndMove(filebot, processingDir, outputDir, db, format)
 				
-				action = 'added'
-								
+				action = 'added'					
 			# if torrent goes from seeding -> finished, remove torrent from list
 			elif torrent_prev == 'seeding' and torrent_state == 'finished':
 				processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
@@ -362,7 +360,9 @@ if __name__ == "__main__":
 					print 'removing torrent from uTorrent\n'
 					processor.removeTorrent(torrent_hash)
 					action = 'removed'
-			
+			else:
+				print 'torrent has not transitioned to the proper states for processing'
+				
 			# notify user
 			if (action == 'added' and config.getboolean("General","notify")) or (action == 'removed' and config.getboolean("General","notifyRemove")):
 				print 'sending notifications'
@@ -391,6 +391,8 @@ if __name__ == "__main__":
 					devices = config.get("PushBullet", "devices").split('|')
 					processor.sendPush(token, devices, notification)
 				print '--\n'
+		else:
+			print 'label does not have a config file'
 			
 		print 'DONE!'
 		#raw_input('press enter')
