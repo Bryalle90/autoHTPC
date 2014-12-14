@@ -338,7 +338,7 @@ if __name__ == "__main__":
 						'port': self.config.get("Email", "SMTPPort"),
 						'user': self.config.get("Email", "username"),
 						'pass': self.config.get("Email", "password"),
-						'to': self.config.get("Email", "emailTo")
+						'to': self.config.get("Email", "emailTo").split('|')
 					}
 					processor.sendEmail(email_info, notification)
 				if config.getboolean("PushBullet", "enable"):

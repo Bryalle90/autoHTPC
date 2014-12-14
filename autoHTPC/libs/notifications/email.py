@@ -5,10 +5,6 @@ class Email():
 		pass
 
 	def send_email(self, email_info, msg):
-
-		receivers = []
-		receivers.extend(email_info['to'].split('|'))
-
 		try:
 			smtpserver = smtplib.SMTP(email_info['server'],int(email_info['port']))
 			smtpserver.ehlo()
@@ -19,7 +15,7 @@ class Email():
 			print e
 			return False
 
-		smtpserver.sendmail(email_info['server'], receivers, msg)
+		smtpserver.sendmail(email_info['server'], email_info['to'], msg)
 
 		smtpserver.close()
 

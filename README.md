@@ -55,7 +55,7 @@ SMTPServer   | Email server (gmail is default)
 SMTPPort     | Email port (gmail is default)
 username     | Your email username (example@gmail.com)
 password     | Your email password
-emailTo      | What address to email (suggested to use your own email address again)
+emailTo      | What addresses to email notification to, separated by (pipe character)
 
 PushBullet   | 
 ------------:| :------------
