@@ -9,8 +9,8 @@ import ConfigParser
 import libs.client.utorrent as torrent_client
 
 from libs.unrar2 import RarFile
-from libs.pushbullet import PushBullet
-from libs import email
+from libs.notifications.pushbullet import PushBullet
+from libs.notifications.email import Email
 
 class Process():		
 	def getStateType(self, state):
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 	if len(sys.argv) == 4:
 		root = os.path.dirname(os.path.realpath(sys.argv[0]))
 		labels_folder = os.path.normpath(os.path.join(root, 'labels'))
-		filebot_path = os.path.normpath(os.path.join(root, 'libs', 'FileBot_4.5', 'FileBot.exe'))
+		filebot_path = os.path.normpath(os.path.join(root, 'libs', 'FileBot_4.5', 'FileBot.jar'))
 		
 		# create our file processor
 		processor = Process()
@@ -270,7 +270,7 @@ if __name__ == "__main__":
 						'pass': self.config.get("Email", "password"),
 						'to': self.config.get("Email", "emailTo")
 					}
-					em = email.Email()
+					em = Email()
 					em.send_email(email_info, notification)
 				if config.getboolean("PushBullet", "enable"):
 					title = 'autoHTPC Notification'
