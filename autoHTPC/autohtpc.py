@@ -12,6 +12,9 @@ from libs.unrar2 import RarFile
 from libs.notifications.pushbullet import PushBullet
 from libs.notifications.email import Email
 
+NAME = 'Bryan Allen'
+VERSION = '1.2'
+
 class Process():		
 	def getStateType(self, state):
 		state = int(state)
@@ -62,7 +65,6 @@ class Process():
 				return True
 		return False
 
-	# returns true if file is the main rar file in a rar set or just a single rar
 	def isMainRar(self, f):
 		with open(f, "rb") as this_file:
 			byte = this_file.read(12)
@@ -108,9 +110,9 @@ class Process():
 				else:
 					rar_handle.extract(condition=[rar_file.index], path=destination, withSubpath=True, overwrite=False)
 			del rar_handle
-			print "Successfully extracted " + file_name
+			print '\tSuccess!'
 		except Exception, e:
-			print "Failed to extract " + file_name + ": " + str(e)
+			print '\tFailed:', str(e)
 			
 	def createDir(self, directory):
 		if not os.path.isdir(directory):
@@ -121,20 +123,20 @@ class Process():
 					raise
 				pass
 				
-	# copies a file to a destination folder, returns success
 	def copyFile(self, source_file, destination):
-		file_name = os.path.split(source_file)[1]
-		destination_file = os.path.join(destination, file_name)
-		print 'attempting to copy:', file_name
-		if not os.path.isfile(destination_file) and os.path.isfile(source_file):
-			try:
-				shutil.copy2(source_file, destination_file)
-				print "Successfully copied " + file_name
-			except Exception, e:
-				print 'Failed to copy ' + file_name + ': ' + str(e) + '\n'
-		else:
-			print file_name + ' already exists in destination - skipping'
-
+		if os.path.isfile(source_file):
+			file_name = os.path.split(source_file)[1]
+			destination_file = os.path.join(destination, file_name)
+			print 'attempting to copy:', file_name
+			if not os.path.isfile(destination_file):
+				try:
+					shutil.copy2(source_file, destination_file)
+					print '\tSuccess!'
+				except Exception, e:
+					print '\tFailed:',str(e)
+			else:
+				print '\t', file_name, 'already exists in destination - skipping'
+				
 	def cleanDir(self, path, desiredExtensions, ignore):
 		# remove any file that doesn't have a desired extension or has an ignore word in the file name
 		for dirName, subdirList, fileList in os.walk(path):
@@ -241,20 +243,23 @@ class Process():
 		
 if __name__ == "__main__":
 	if len(sys.argv) == 4:
+		print 'autoHTPC'
+		print 'by:', NAME
+		print 'version:', VERSION
+		print ''
+		
 		root = os.path.dirname(os.path.realpath(sys.argv[0]))
 		config_folder = os.path.normpath(os.path.join(root, 'cfg'))
 		labels_folder = os.path.normpath(os.path.join(config_folder, 'labels'))
 		filebot = os.path.normpath(os.path.join(root, 'libs', 'FileBot_4.5', 'filebot'))
 		
-		# create our file processor
+		# create torrent processor
 		processor = Process()
 		
-		print 'autoHTPC script running'
 		# get torrent info from uTorrent
 		torrent_hash = sys.argv[1]							 # Hash of the torrent, %I
 		torrent_prev = processor.getStateType(sys.argv[2])	 # Previous state of the torrent, %P
 		torrent_state = processor.getStateType(sys.argv[3])	 # Current state of the torrent, %S
-		print '--'
 		
 		print 'info received:'
 		print '--'
