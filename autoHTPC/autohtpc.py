@@ -92,8 +92,11 @@ class Process():
 			if file.endswith(extensions):
 				if not (self.isSubstring(ignore, os.path.split(file)[1])):
 					if file.endswith('.rar'):
-						if self.isMainRar(file):
-							keep.append(file)
+						try:
+							if self.isMainRar(file):
+								keep.append(file)
+						except Exception, e:
+							print 'File does not exist:', file, '\n'
 					else:
 						keep.append(file)
 		return keep
