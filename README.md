@@ -38,6 +38,7 @@
 General      | 
 ------------:| :------------
 path         | location for files to be extracted/copied to before processing by FileBot
+overwrite    | (True/False) overwrite files that are already present in final directory
 remove       | (True/False) remove torrent from uTorrent when done seeding
 notify       | (True/False) send a notification when done processing a torrent
 notifyRemove | (True/False) send a notification when removing a torrent
@@ -84,4 +85,5 @@ Filebot      |
 ------------:| :------------
 database     | TV: `TVRage, AniDB, TheTVDB` Movies: `OpenSubtitles, IMDb, TheMovieDB`
 format       | How you want your file names to be [formatted](http://www.filebot.net/naming.html)
+language     | The [2-letter language code](http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) for episode/movie titles 
 path         | The final path for your file(s)

@@ -158,14 +158,17 @@ class Process():
 				print 'removing directory:', dirName
 				os.rmdir(dirName)
 			
-	def renameAndMove(self, filebot, source, dest, db, format):
+	def renameAndMove(self, filebot, source, dest, db, format, lang='en', ow=True):
+		conflict = 'override' if ow else 'skip'
 		fb_args = [
 			filebot,
 			'-rename', source,
 			'--output', dest,
 			'--db', db,
 			'--format', format,
-			'-non-strict'
+			'--lang', lang,
+			'--conflict', conflict,
+			'-non-strict', '-r'
 		]
 		try:
 			subprocess.call(fb_args)
@@ -350,8 +353,10 @@ if __name__ == "__main__":
 				print 'sending file info to filebot\n'
 				outputDir = label_config.get("Filebot","path")
 				db = label_config.get("Filebot","database")
+				lang = label_config.get("Filebot","language")
 				format = label_config.get("Filebot","format")
-				processor.renameAndMove(filebot, processingDir, outputDir, db, format)
+				ow = config.getboolean("General", "overwrite")
+				processor.renameAndMove(filebot, processingDir, outputDir, db, format, lang, ow)
 				
 				action = 'added'					
 			# if torrent goes from seeding -> finished, remove torrent from list
