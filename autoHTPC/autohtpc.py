@@ -129,7 +129,7 @@ class Process():
 	def copyFile(self, source_file, destination):
 		if os.path.isfile(source_file):
 			file_name = os.path.split(source_file)[1]
-			destination_file = os.path.join(destination, file_name)
+			destination_file = os.path.normpath(os.path.join(destination, file_name))
 			print 'attempting to copy:', file_name
 			if not os.path.isfile(destination_file):
 				try:
@@ -139,7 +139,8 @@ class Process():
 					print '\tFailed:',str(e)
 			else:
 				print '\t', file_name, 'already exists in destination - skipping'
-				
+			return destination_file
+			
 	def cleanDir(self, path, desiredExtensions, ignore):
 		# remove any file that doesn't have a desired extension or has an ignore word in the file name
 		for dirName, subdirList, fileList in os.walk(path):
