@@ -84,6 +84,7 @@ readme       | (True/False) For this label, do you want to keep files of this ty
 Filebot      | 
 ------------:| :------------
 database     | TV: `TVRage, AniDB, TheTVDB` Movies: `OpenSubtitles, IMDb, TheMovieDB`
+query        | Force a specific search string, leave blank to derive from file name
 format       | How you want your file names to be [formatted](http://www.filebot.net/naming.html)
 language     | The [2-letter language code](http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) for episode/movie titles 
 path         | The final path for your file(s)
