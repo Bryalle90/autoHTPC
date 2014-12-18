@@ -303,77 +303,81 @@ if __name__ == "__main__":
 			print 'label is blank - skipping'
 		elif os.path.isfile(os.path.join(labels_folder, torrent['label']) + '.cfg'):
 			action = None
-			# if torrent goes from downloading -> seeding, copy and extract files
-			if (torrent_prev == 'downloading') and (torrent_state == 'seeding' or torrent_state == 'moving'):
-				# get what extensions we want
-				extensions = {
-					'video': config.get("Extensions","video").split('|'),
-					'subs': config.get("Extensions","subtitle").split('|'),
-					'readme': config.get("Extensions","readme").split('|'),
-				}
-				label_config = processor.readConfig(labels_folder, torrent['label'])
-				keep_ext = {
-					'video': label_config.getboolean("Type", "video"),
-					'subs': label_config.getboolean("Type", "subtitle"),
-					'readme': label_config.getboolean("Type", "readme")
-				}
-				desiredExtensions = processor.getExtensions(keep_ext, extensions)
-				print 'looking for files with these extensions:', desiredExtensions, '\n'
-				
-				
-				# get words we don't want
-				wordsToIgnore = config.get("Extensions","ignore").split('|')
-				print 'ignoring files with these words in the file name:', wordsToIgnore, '\n'
-				
-				# get what files to keep from torrent folder
-				filesToCopy = processor.filterFiles(torrent['files'], desiredExtensions, wordsToIgnore)
-				
-				# get archives to extract from
-				archiveExtensions = tuple(config.get("Extensions","archive").split('|'))
-				filesToExtract = processor.filterArchives(torrent['files'], archiveExtensions, wordsToIgnore)
-				
-				# copy/extract files to processing directory
-				processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
-				processor.createDir(processingDir)
-				print 'copying and extracting files to:\n\t', processingDir
-				print '--'
-				for file in filesToCopy:
-					processor.copyFile(file, processingDir)
-				for file in filesToExtract:
-					processor.extract(file, processingDir)
-				print '--\n'
-				
-				# clean out unwanted files from processing dir
-				print 'cleaning unwanted files in:\n\t', processingDir
-				print '--'
-				processor.cleanDir(processingDir, desiredExtensions, wordsToIgnore)
-				print '--\n'
-				
-				# use filebot to rename files and move to final directory
-				print 'sending file info to filebot\n'
-				outputDir = label_config.get("Filebot","path")
-				db = label_config.get("Filebot","database")
-				lang = label_config.get("Filebot","language")
-				format = label_config.get("Filebot","format")
-				ow = config.getboolean("General", "overwrite")
-				processor.renameAndMove(filebot, processingDir, outputDir, db, format, lang, ow)
-				
-				action = 'added'					
-			# if torrent goes from seeding -> finished, remove torrent from list
-			elif torrent_prev == 'seeding' and torrent_state == 'finished':
-				processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
-				print 'removing processing directory\n'
-				if os.path.isdir(processingDir):
-					shutil.rmtree(processingDir, ignore_errors=True)
-				if config.getboolean("General","remove"):
-					print 'removing torrent from uTorrent\n'
-					processor.removeTorrent(torrent_hash)
-					action = 'removed'
-			else:
-				print 'torrent has not transitioned to the proper states for processing'
+			try:
+				# if torrent goes from downloading -> seeding, copy and extract files
+				if (torrent_prev == 'downloading') and (torrent_state == 'seeding' or torrent_state == 'moving'):
+					# get what extensions we want
+					extensions = {
+						'video': config.get("Extensions","video").split('|'),
+						'subs': config.get("Extensions","subtitle").split('|'),
+						'readme': config.get("Extensions","readme").split('|'),
+					}
+					label_config = processor.readConfig(labels_folder, torrent['label'])
+					keep_ext = {
+						'video': label_config.getboolean("Type", "video"),
+						'subs': label_config.getboolean("Type", "subtitle"),
+						'readme': label_config.getboolean("Type", "readme")
+					}
+					desiredExtensions = processor.getExtensions(keep_ext, extensions)
+					print 'looking for files with these extensions:', desiredExtensions, '\n'
+					
+					
+					# get words we don't want
+					wordsToIgnore = config.get("Extensions","ignore").split('|')
+					print 'ignoring files with these words in the file name:', wordsToIgnore, '\n'
+					
+					# get what files to keep from torrent folder
+					filesToCopy = processor.filterFiles(torrent['files'], desiredExtensions, wordsToIgnore)
+					
+					# get archives to extract from
+					archiveExtensions = tuple(config.get("Extensions","archive").split('|'))
+					filesToExtract = processor.filterArchives(torrent['files'], archiveExtensions, wordsToIgnore)
+					
+					# copy/extract files to processing directory
+					processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
+					processor.createDir(processingDir)
+					print 'copying and extracting files to:\n\t', processingDir
+					print '--'
+					for file in filesToCopy:
+						processor.copyFile(file, processingDir)
+					for file in filesToExtract:
+						processor.extract(file, processingDir)
+					print '--\n'
+					
+					# clean out unwanted files from processing dir
+					print 'cleaning unwanted files in:\n\t', processingDir
+					print '--'
+					processor.cleanDir(processingDir, desiredExtensions, wordsToIgnore)
+					print '--\n'
+					
+					# use filebot to rename files and move to final directory
+					print 'sending file info to filebot\n'
+					outputDir = label_config.get("Filebot","path")
+					db = label_config.get("Filebot","database")
+					lang = label_config.get("Filebot","language")
+					format = label_config.get("Filebot","format")
+					ow = config.getboolean("General", "overwrite")
+					processor.renameAndMove(filebot, processingDir, outputDir, db, format, lang, ow)
+					
+					action = 'added'					
+				# if torrent goes from seeding -> finished, remove torrent from list
+				elif torrent_prev == 'seeding' and torrent_state == 'finished':
+					processingDir = os.path.normpath(os.path.join(config.get("General","path"), torrent['name']))
+					print 'removing processing directory\n'
+					if os.path.isdir(processingDir):
+						shutil.rmtree(processingDir, ignore_errors=True)
+					if config.getboolean("General","remove"):
+						print 'removing torrent from uTorrent\n'
+						processor.removeTorrent(torrent_hash)
+						action = 'removed'
+				else:
+					print 'torrent has not transitioned to the proper states for processing'
+			except Exception, e:
+				action = 'error'
+				print 'something went wrong:', str(e)
 				
 			# notify user
-			if (action == 'added' and config.getboolean("General","notify")) or (action == 'removed' and config.getboolean("General","notifyRemove")):
+			if (action == 'added' and config.getboolean("General","notify")) or (action == 'removed' and config.getboolean("General","notifyRemove")) or (action == 'error' and config.getboolean("General","notifyError")):
 				print 'sending notifications'
 				print '--'
 				notification = {
