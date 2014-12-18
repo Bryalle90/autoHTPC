@@ -1,2 +1,12 @@
 labels/temp.cfg
 labels/tvwsubs.cfg
+autoHTPC/libs/FileBot_4.5/cache/0/.lock
+autoHTPC/libs/FileBot_4.5/cache/0/web-datasource-lv2.data
+autoHTPC/libs/FileBot_4.5/cache/0/web-datasource-lv2.index
+autoHTPC/libs/FileBot_4.5/cache/0/web-datasource-lv3.data
+autoHTPC/libs/FileBot_4.5/cache/0/web-datasource-lv3.index
+autoHTPC/libs/FileBot_4.5/cache/0/web-datasource.data
+autoHTPC/libs/FileBot_4.5/cache/0/web-datasource.index
+autoHTPC/libs/FileBot_4.5/cache/0/web-persistent-datasource.data
+autoHTPC/libs/FileBot_4.5/cache/0/web-persistent-datasource.index
+autoHTPC/libs/FileBot_4.5/prefs.properties
