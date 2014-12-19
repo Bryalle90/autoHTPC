@@ -313,7 +313,7 @@ if __name__ == "__main__":
 			action = None
 			try:
 				# if torrent goes from downloading -> seeding, copy and extract files
-				if (torrent_prev == 'downloading') and (torrent_state == 'seeding' or torrent_state == 'moving'):
+				if (torrent_prev == 'downloading') and (torrent_state == 'seeding'):
 					# get what extensions we want
 					extensions = {
 						'video': config.get("Extensions","video").split('|'),
@@ -382,7 +382,7 @@ if __name__ == "__main__":
 				else:
 					print 'torrent has not transitioned to the proper states for processing'
 			except Exception, e:
-				action = 'error'
+				action = 'error: '+str(e)
 				print 'something went wrong:', str(e)
 				
 			# notify user
