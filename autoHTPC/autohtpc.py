@@ -1,6 +1,4 @@
-import os
-import sys
-import time
+import os, sys, time, textwrap
 import errno
 import shutil
 import binascii
@@ -11,7 +9,14 @@ import libs.client.utorrent as torrent_client
 from libs.unrar2 import RarFile
 from libs.notifications.pushbullet import PushBullet
 from libs.notifications.email import Email
-
+HEADER = textwrap.dedent('''
+              _        _    _ _______ _____   _____ 
+             | |      | |  | |__   __|  __ \ / ____|
+   __ _ _   _| |_ ___ | |__| |  | |  | |__) | |     
+  / _` | | | | __/ _ \|  __  |  | |  |  ___/| |     
+ | (_| | |_| | || (_) | |  | |  | |  | |    | |____ 
+  \__,_|\__,_|\__\___/|_|  |_|  |_|  |_|     \_____|
+''')
 NAME = 'Bryan Allen'
 VERSION = '1.2'
 
@@ -253,10 +258,10 @@ class Process():
 		
 if __name__ == "__main__":
 	if len(sys.argv) == 4:
-		print 'autoHTPC'
+		print HEADER
 		print 'by:', NAME
 		print 'version:', VERSION
-		print ''
+		print '-----------------------------------------------------'
 		
 		root = os.path.dirname(os.path.realpath(sys.argv[0]))
 		config_folder = os.path.normpath(os.path.join(root, 'cfg'))
