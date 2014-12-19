@@ -358,7 +358,7 @@ if __name__ == "__main__":
 					outputDir = label_config.get("Filebot","path")
 					db = label_config.get("Filebot","database")
 					format = label_config.get("Filebot","format")
-					query = label_config.getboolean("Filebot", "query")
+					query = label_config.get("Filebot", "query")
 					lang = label_config.get("Filebot","language")
 					ow = config.getboolean("General", "overwrite")
 					processor.renameAndMove(filebot, processingDir, outputDir, db, format, query, lang, ow)
