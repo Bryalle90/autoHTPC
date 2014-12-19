@@ -72,7 +72,7 @@ class Process():
 		spanned = binascii.hexlify(byte[10])
 		main = binascii.hexlify(byte[11])
 
-		if spanned == "01" and main == "01":	# main rar archive in a set of archives
+		if (spanned == "01" or spanned == "11") and main == "01":	# main rar archive in a set of archives
 			return True
 		elif spanned == "00" and main == "00":	# single rar
 			return True
